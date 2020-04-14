@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block head %}
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" 
+		integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" 
+		crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" 
+		integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" 
+		crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" 
+		integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" 
+    crossorigin="anonymous"></script>
+{% endblock %}
+
+{% block body %}
+
+<!--- Four Trash Section -->
+<div class="touchscreen ">
+    <div class="touchscreen-titlebar">
+        <div>Select the category</div>
+    </div>
+    <div class="touchscreen-body">
+        <div class="touchscreen-select-row touchscreen-row-3"><!-- row text-center padding"> -->
+
+            <button type="button" class="btn btn-outline-primary" onclick="window.location.href='getUserInput#metal'">Metal</button>
+            <button type="button" class="btn btn-outline-success" onclick="window.location.href='getUserInput#paper'">Paper</button>
+            <button type="button" class="btn btn-outline-warning" onclick="window.location.href='getUserInput#glass'">Glass</button>	
+
+        </div>
+        <form action="http://127.0.0.1:5000/getUserInput" method="POST">
+            <div class="touchscreen-select-row touchscreen-row-1">
+                <input name="c1" value="123" hidden/>
+                <button type="submit" class="btn btn-outline-danger" onclick="window.location.href='getUserInput#trash'" value='submit'>Non-recyclable</button>
+                <!-- <button type="button" class="btn btn-outline-danger " onclick="window.location.href='getUserInput#trash'">Non-recyclable</button> -->
+            </div>
+        </form>
+    </div>
+</div>
+
+
+{% endblock %}

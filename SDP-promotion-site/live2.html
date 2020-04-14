@@ -1,0 +1,326 @@
+<div style="height: 620px;">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+<script src="https://static.codepen.io/assets/editor/iframe/iframeRefreshCSS-e03f509ba0a671350b4b363ff105b2eb009850f34a2b4deaadaa63ed5d970b37.js"></script>
+<script src="https://static.codepen.io/assets/common/stopExecutionOnTimeout-157cd5b220a5c80d4ff8e0e70ac069bffd87a61252088146915e8726e5d9f147.js"></script>
+<script src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/16327/TweenMax-latest-beta.js?v=333"></script>
+<script src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/16327/MorphSVGPlugin.min.js?r=1899"></script>
+<script src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/16327/findShapeIndex.js"></script>
+<script src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/16327/Draggable-latest-alpha.js"></script>
+
+   
+    <style>
+        .ani-background { width: 750px; height: 640px; background-color: #333; padding: 35px 0  5px 0; }
+        .ani-wrapper { position: relative; display: block; width:1000px; height:800px; transform: scale(.75) ; transform-origin: top left; }
+        /* .ani-wrapper { position: relative; display: block; width:1000px; height:800px; transform: scale(.75) translateY(-135px) translateX(-167px); } */
+        .ani-canvas { position: absolute; height: auto; }
+        .ani-recyclotron { height: auto; width: auto; position: absolute; top: 250px; left: 500px; z-index: 1000;}
+        .ani-recyclotron img { height: 125px; width: auto; }
+
+        .ani-img-offsetY { transform: translate(0, 40px); }
+
+        .trash-img { height: 100px; width: auto; position: absolute; border: 0px solid white; }
+        .trash-slot-1 { top: 50px; left: 100px; }
+        .trash-slot-2 { top: 50px; left: 300px; }
+        .trash-slot-3 { top: 50px; left: 500px; }
+        .trash-slot-4 { top: 50px; left: 700px; }
+        .trash-slot-5 { top: 50px; left: 900px; }
+        /* .trash-slot-6 { top: 50px; left: 500px; } */
+
+        .ani-bin { height: 200px; width: auto; position: absolute; border: 0px solid white; z-index: 1000; }
+        .ani-bin-1 { top: 400px; left: 100px; }
+        .ani-bin-2 { top: 400px; left: 300px; }
+        .ani-bin-3 { top: 400px; left: 555px; }
+        .ani-bin-4 { top: 400px; left: 755px; }
+        .ani-server { height: 100px; width: auto; top: 700px; left: 500px; position: absolute; border: 0px solid white; z-index: 1000; }
+
+        #replay { position: absolute; right: 50px; bottom: 50px; filter: invert(1); }
+        #replay:active { filter: invert(0); }
+        #replay img { height: 40px; width: auto; }
+        #replay img:hover { height: 50px; width: auto; }
+
+        .foot { position: relative; display: block; margin: 20px auto; width: 1000; height: 800px; }
+        .foot img { position: absolute; left: 0; }
+
+        .signal-animation { -webkit-transition: stroke-dashoffset 0.4s ease-in-out; transition: stroke-dashoffset 0.4s ease-in-out; }
+
+        .svg-spacer { display: block; height: 40px; border: 1px solid #333; background-color: #333; transform: translateY(1px); }
+
+    </style>
+
+    <div class="ani-background">
+        <div id="demo-canvas" class="ani-wrapper">
+
+            <div class="ani-recyclotron center-origin"> <img id="recyclotron" src="https://recyclotron.zhixing.dev/wp-content/uploads/2020/04/recyclotron.png"> </div>
+
+            <img id="bin2"   class="ani-bin ani-bin-1"        src="https://recyclotron.zhixing.dev/wp-content/uploads/2020/04/bin2.png">
+            <img id="bin3"   class="ani-bin ani-bin-2"        src="https://recyclotron.zhixing.dev/wp-content/uploads/2020/04/bin4.png">
+            <img id="bin4"   class="ani-bin ani-bin-3"        src="https://recyclotron.zhixing.dev/wp-content/uploads/2020/04/bin3.png">
+            <img id="bin5"   class="ani-bin ani-bin-4"        src="https://recyclotron.zhixing.dev/wp-content/uploads/2020/04/bin5.png">
+            <img id="server" class="ani-server center-origin" src="https://recyclotron.zhixing.dev/wp-content/uploads/2020/04/server.png">
+            
+            <!-- <div class="svg-spacer"></div> -->
+
+            <svg id="demo" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 800">
+
+                <!-- <rect id="background" width="1000" height="800" fill="#333"></rect> -->
+
+                <circle id="dot1-origin" cx="10" cy="50" r="0" fill="yellow"></circle>
+                <circle id="dot2-origin" cx="300" cy="50" r="0" fill="red"></circle>
+                <circle id="dot3-origin" cx="500" cy="50" r="0" fill="grey"></circle>
+                <circle id="dot4-origin" cx="700" cy="50" r="0" fill="blue"></circle>
+                <circle id="dot5-origin" cx="900" cy="50" r="0" fill="green"></circle>
+
+                <text class="center-origin" x="175" y="643" fill="#999" font-size="30">Trash</text>
+                <text class="center-origin" x="375" y="643" fill="#999" font-size="30">Recyclable</text>
+                <text class="center-origin" x="625" y="643" fill="#999" font-size="30">Metal</text>
+                <text class="center-origin" x="830" y="643" fill="#999" font-size="30">Glass</text>
+
+                <path id="toserver" d="M 500 700 l 0,-360" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-miterlimit="10"></path>
+                
+                <text class="center-origin" x="500" y="350" fill="#999" font-size="30">Recyclotron</text>
+                <text class="center-origin" x="400" y="730" fill="#999" font-size="30">Server</text>
+
+                <path id="upperPath1" d="M 100 50  C 100,200 500, 50 500,200 L 500 250" stroke="yellow" stroke-width="0" fill="none"></path>
+                <path id="lowerPath1" d="M 500 250 C 500,450 175,220 175,400 l 0,50" stroke="orange" stroke-width="0" fill="none"></path>
+                <path id="upperPath2" d="M 300 50  C 400,200 500,100 500,200 L 500 250" stroke="pink" stroke-width="0" fill="none"></path>
+                <path id="lowerPath2" d="M 500 250 C 500,390 375,300 375,400 l 0,50" stroke="red" stroke-width="0" fill="none"></path>
+                <path id="upperPath3" d="M 500 50  L 500 250" stroke="grey" stroke-width="0" fill="none"></path>
+                <path id="upperPath4" d="M 700 50  C 600,200 500,100 500,200 L 500 250" stroke="cyan" stroke-width="0" fill="none"></path>
+                <path id="lowerPath4" d="M 500 250 C 500,390 625,300 625,400 l 0,50" stroke="blue" stroke-width="0" fill="none"></path>
+                <path id="upperPath5" d="M 900 50 C 900,200 500,50 500,200 L 500 250" stroke="green" stroke-width="0" fill="none"></path>
+                <path id="lowerPath5" d="M 500 250 C 500,450 825,220 825,400  l 0,50" stroke="brown" stroke-width="0" fill="none"></path>
+
+                <g>
+                    <path id="" d="M 520 250 l 70,0" stroke="#d5d5d7" stroke-width="5" fill="none"></path>
+                    <rect id="recyclotron-textframe" x="580" y="225" stroke="#87868c" stroke-width="5" width="200" height="45" fill="#e5e5e6"></rect>
+                </g>
+
+                <g>
+                    <path id="" d="M 520 690 l 70,0" stroke="#d5d5d7" stroke-width="5" fill="none"></path>
+                    <path id="" d="M 520 734 l 80,0 l 0,-20" stroke="#d5d5d7" stroke-width="5" fill="none"></path>
+                    <rect id="server-textframe" x="580" y="675" stroke="#87868c" stroke-width="5" width="200" height="45" fill="#e5e5e6"></rect>
+                </g>
+
+            </svg>
+            <div id="replay"><img src="https://recyclotron.zhixing.dev/wp-content/uploads/2020/04/replay.png"></div>
+        </div>
+    </div>
+
+    <script id="rendered-js">
+        console.clear();
+
+        function clog(s1) {
+            console.log(s1);
+        }
+
+        function createElementFromHTML(htmlString) {
+            var div = document.createElement('div');
+            div.innerHTML = htmlString.trim();
+
+            // Change this to div.childNodes to support multiple top-level nodes
+            return div.firstChild; 
+        }
+
+        function shuffle(a) {
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        var slots = [ null,null,null,null,null ];
+
+        var trash_list = [];
+        function init_trash() {
+            const configs = [{
+                    "src": "https://recyclotron.zhixing.dev/wp-content/uploads/2020/04/can.gif", "type": "metal", "alt": "can"
+                }, {
+                    "src": "https://recyclotron.zhixing.dev/wp-content/uploads/2020/04/cardboard.gif", "type": "recyclable", "alt": "cardboard box"
+                }, {
+                    "src": "https://recyclotron.zhixing.dev/wp-content/uploads/2020/04/glass.gif", "type": "glass", "alt": "glass"
+                }, {
+                    "src": "https://recyclotron.zhixing.dev/wp-content/uploads/2020/04/metal.png", "type": "metal", "alt": "metal"
+                }, {
+                    "src": "https://recyclotron.zhixing.dev/wp-content/uploads/2020/04/metalSpoon.png", "type": "metal", "alt": "metal spoon", "style": "height: 66px; width: 94px;"
+                }, {
+                    "src": "https://recyclotron.zhixing.dev/wp-content/uploads/2020/04/paper.gif", "type": "trash", "alt": "newspaper"
+                }, {
+                    "src": "https://recyclotron.zhixing.dev/wp-content/uploads/2020/04/plastic.gif", "type": "recyclable", "alt": "plastic bag", "style": "height: 120px;"
+                }, {
+                    "src": "https://recyclotron.zhixing.dev/wp-content/uploads/2020/04/trash.gif", "type": "trash", "alt": "banana skin", "style": "height: 110px; width: 110px;"
+            }];
+            for (i = 0; i < configs.length; i++ ) {
+                let temp = document.createElement("IMG");
+                
+                temp.setAttribute("id", "trash"+i);
+                temp.setAttribute("class", "ani-trash trash-img center-origin");
+                for (var key in configs[i]) { 
+                    if (configs[i].hasOwnProperty(key)) { 
+                        temp.setAttribute(key, configs[i][key]);
+                    } 
+                }  
+                trash_list.push(temp);
+            }
+        }
+
+        function autoload_trash() {
+            // <img id="trash5" class="ani-trash trash-img trash-img-5 center-origin" src="img/trash.gif" />
+            let canvas = document.querySelector("#demo-canvas");
+            let bin_map = { "trash": 1, "recyclable": 2, "metal": 4, "glass": 5 };
+
+            for (i = 0; i < slots.length; i++ ){
+                if (trash_list.length <= 0) { clog("used up trash"); }
+                else if (slots[i] == null) {
+                    clog("loading to slot "+(i+1));
+                    shuffle(trash_list);
+                    shuffle(trash_list);
+                    shuffle(trash_list);
+
+                    let t = trash_list.pop();
+                    let upperRoute = "#upperPath"+(i+1),
+                        lowerRoute = "#lowerPath"+bin_map[t.getAttribute("type")];
+                        old_class  = t.getAttribute("class");
+                    t.setAttribute("class", old_class+" trash-slot-"+(i+1));
+                    t.setAttribute("upperPath", upperRoute);
+                    t.setAttribute("lowerPath", lowerRoute);
+                    t.setAttribute("slot", i);
+
+                    t.onclick = ani_trigger;
+
+                    clog(t.getAttribute("class")+"  "+t.getAttribute("type")+" #lowerPath"+bin_map[t.getAttribute("type")]);
+                    canvas.appendChild(t);
+                    slots[i] = true;
+                } else {
+                    clog("trash used up");
+                }
+            }
+
+            
+            TweenLite.set(".center-origin", {
+                xPercent: -50,
+                yPercent: -50
+            });
+        }
+
+        function ani_trigger() {
+            clog("Doing animation with " + this.id);
+            if ((ani_running) || (myFlags.includes(this.id))) {
+                clog("something executing.");
+                return;
+            } else {
+                ani_running = true;
+                myFlags.push(this.id);
+                executeAnimationX(this.id)
+                // tweens.push(executeAnimationX(this.id));
+            }
+        }
+
+        var myFlags = [],
+            tweens = [],
+            ani_running = false;
+
+        function completeFunc() {
+            ani_running = false;
+            clog("animation finished.");
+            clog(slots);
+            autoload_trash();
+            clog(slots);
+        }
+
+        function executeAnimationX(id) {
+            id = "#"+id;
+            let tl = new TimelineMax({onComplete:completeFunc}),
+                target    = document.querySelector(id),
+                upperPath = target.getAttribute("upperPath"),
+                lowerPath = target.getAttribute("lowerPath");
+            
+            let upperMotionPath = MorphSVGPlugin.pathDataToBezier(upperPath, {align:"relative"});
+            let lowerMotionPath = MorphSVGPlugin.pathDataToBezier(lowerPath, {align:"relative"});
+            
+            slots[target.getAttribute("slot")] = null;
+
+            return tl.to(id, 1, {bezier: {values: upperMotionPath, type: "cubic"}})
+                     .to(id, 1, {bezier: {values: lowerMotionPath, type: "cubic"}});
+
+        }
+
+        function SignalAnimation(svg, pathName, strokeWidth=3, color="#000") {
+
+            this.element = svg;
+            this.path = pathName;
+            this.strokeWidth = strokeWidth;
+            this.color = color;
+
+            this.mask = null;
+            this.pathLength = 0;
+
+            this.init = function () {
+
+                // clone the path and make it black
+                this.element = document.querySelector(this.element);
+                var path = this.element.querySelector(this.path);
+                var mask = path.cloneNode();
+                this.path = path;
+
+                mask.setAttribute('stroke', this.color);
+                mask.removeAttribute('stroke-dasharray');
+                mask.setAttribute('stroke-width', this.strokeWidth);
+                mask.classList.add('svg-mask');
+                this.element.appendChild(mask);
+                this.mask = mask;
+                this.mask.classList.add('signal-animation');
+
+                // calculate the path length
+                this.pathLength = this.mask.getTotalLength();
+                this.mask.style.strokeDasharray = this.pathLength + ' ' + this.pathLength;
+
+            };
+
+            // Could replace this with a tween if needed.
+            this.send = function () {
+                this.mask.style.strokeDashoffset = this.pathLength;
+            };
+
+            this.recive = function () {
+                this.mask.style.strokeDashoffset = 0;
+            };
+
+            this.init();
+        }
+
+        $("#replay").on("click", function () {
+            myFlags = [];
+            ani_running = false;
+            slots = [ null,null,null,null,null ];
+            trash_list = [];
+            $( "#demo-canvas").find(".trash-img" ).each(function() {$(this).remove();})
+            init_trash();
+            autoload_trash();
+            // for (i = 0; i < tweens.length; i++) tweens[i].progress(0).pause();
+            // tweens = [];
+        });
+
+        var t = new SignalAnimation('#demo', '#toserver', 5, "#333");
+        // var t2 = new SignalAnimation('#ddd', '#stage3', 8, "#333");
+
+        $("#server").on("click", function () {
+            clog("1233");
+            t.send();
+            // t2.send();
+        });
+
+
+        $("#recyclotron").on("click", function () {
+            clog("server anime2");
+            t.recive();
+            // t2.recive();
+
+        });
+
+        init_trash();
+        autoload_trash();
+        
+    </script>
+</div>
